@@ -53,7 +53,7 @@ func (g Group) ListMembers() (Users, error) {
 		Users Users `json:"value"`
 	}
 	marsh.Users.setGraphClient(g.graphClient)
-	return marsh.Users, g.graphClient.makeGETAPICall(resource, nil, &marsh)
+	return marsh.Users, g.graphClient.MakeGETAPICall(resource, nil, &marsh)
 }
 
 // UnmarshalJSON implements the json unmarshal to be used by the json-library

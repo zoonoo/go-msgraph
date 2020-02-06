@@ -85,8 +85,8 @@ func (g *GraphClient) refreshToken() error {
 	return err
 }
 
-// makeGETAPICall performs an API-Call to the msgraph API. This func uses sync.Mutex to synchronize all API-calls
-func (g *GraphClient) makeGETAPICall(apicall string, getParams url.Values, v interface{}) error {
+// MakeGETAPICall performs an API-Call to the msgraph API. This func uses sync.Mutex to synchronize all API-calls
+func (g *GraphClient) MakeGETAPICall(apicall string, getParams url.Values, v interface{}) error {
 	g.apiCall.Lock()
 	defer g.apiCall.Unlock() // unlock when the func returns
 	// Check token
@@ -161,7 +161,7 @@ func (g *GraphClient) ListUsers() (Users, error) {
 	var marsh struct {
 		Users Users `json:"value"`
 	}
-	err := g.makeGETAPICall(resource, nil, &marsh)
+	err := g.MakeGETAPICall(resource, nil, &marsh)
 	marsh.Users.setGraphClient(g)
 	return marsh.Users, err
 }
@@ -175,7 +175,7 @@ func (g *GraphClient) ListGroups() (Groups, error) {
 	var marsh struct {
 		Groups Groups `json:"value"`
 	}
-	err := g.makeGETAPICall(resource, nil, &marsh)
+	err := g.MakeGETAPICall(resource, nil, &marsh)
 	marsh.Groups.setGraphClient(g)
 	return marsh.Groups, err
 }
@@ -187,7 +187,7 @@ func (g *GraphClient) ListGroups() (Groups, error) {
 func (g *GraphClient) GetUser(identifier string) (User, error) {
 	resource := fmt.Sprintf("/users/%v", identifier)
 	user := User{graphClient: g}
-	err := g.makeGETAPICall(resource, nil, &user)
+	err := g.MakeGETAPICall(resource, nil, &user)
 	return user, err
 }
 
@@ -197,7 +197,7 @@ func (g *GraphClient) GetUser(identifier string) (User, error) {
 func (g *GraphClient) GetGroup(groupID string) (Group, error) {
 	resource := fmt.Sprintf("/groups/%v", groupID)
 	group := Group{graphClient: g}
-	err := g.makeGETAPICall(resource, nil, &group)
+	err := g.MakeGETAPICall(resource, nil, &group)
 	return group, err
 }
 

@@ -48,7 +48,7 @@ func (u User) ListCalendars() (Calendars, error) {
 	var marsh struct {
 		Calendars Calendars `json:"value"`
 	}
-	err := u.graphClient.makeGETAPICall(resource, nil, &marsh)
+	err := u.graphClient.MakeGETAPICall(resource, nil, &marsh)
 	marsh.Calendars.setGraphClient(u.graphClient)
 	return marsh.Calendars, err
 }
@@ -80,7 +80,7 @@ func (u User) ListCalendarView(startDateTime, endDateTime time.Time) (CalendarEv
 	getParams.Add("enddatetime", endDateTime.Format("2006-01-02T00:00:00"))
 
 	var calendarEvents CalendarEvents
-	return calendarEvents, u.graphClient.makeGETAPICall(resource, getParams, &calendarEvents)
+	return calendarEvents, u.graphClient.MakeGETAPICall(resource, getParams, &calendarEvents)
 }
 
 // getTimeZoneChoices grabs all supported time zones from microsoft for this user.
@@ -90,7 +90,7 @@ func (u User) ListCalendarView(startDateTime, endDateTime time.Time) (CalendarEv
 // See https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/outlookuser_supportedtimezones
 func (u User) getTimeZoneChoices() (supportedTimeZones, error) {
 	var ret supportedTimeZones
-	err := u.graphClient.makeGETAPICall(fmt.Sprintf("/users/%s/outlook/supportedTimeZones", u.ID), nil, &ret)
+	err := u.graphClient.MakeGETAPICall(fmt.Sprintf("/users/%s/outlook/supportedTimeZones", u.ID), nil, &ret)
 	return ret, err
 }
 
