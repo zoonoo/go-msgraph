@@ -125,6 +125,49 @@ func (g *GraphClient) MakeGETAPICall(apicall string, getParams url.Values, v int
 	return g.performRequest(req, v)
 }
 
+func (g *GraphClient) MakePOSTAPICall(apicall string, getParams url.Values, body interface{}, v interface{}) error {
+	g.apiCall.Lock()
+	defer g.apiCall.Unlock() // unlock when the func returns
+	// Check token
+	if g.token.WantsToBeRefreshed() { // Token not valid anymore?
+		err := g.refreshToken()
+		if err != nil {
+			return err
+		}
+	}
+
+	reqURL, err := url.ParseRequestURI(BaseURL)
+	if err != nil {
+		return fmt.Errorf("Unable to parse URI %v: %v", BaseURL, err)
+	}
+
+	// Add Version to API-Call, the leading slash is always added by the calling func
+	reqURL.Path = "/" + APIVersion + apicall
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		panic(err)
+	}
+	req, err := http.NewRequest("POST", reqURL.String(), bytes.NewBuffer(b))
+	if err != nil {
+		return fmt.Errorf("HTTP request error: %v", err)
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", g.token.GetAccessToken())
+
+	if getParams == nil { // initialize getParams if it's nil
+		getParams = url.Values{}
+	}
+
+	// TODO: Improve performance with using $skip & paging instead of retrieving all results with $top
+	// TODO: MaxPageSize is currently 999, if there are any time more than 999 entries this will make the program unpredictable... hence start to use paging (!)
+	getParams.Add("$top", strconv.Itoa(MaxPageSize))
+	req.URL.RawQuery = getParams.Encode() // set query parameters
+
+	return g.performRequest(req, v)
+}
+
 // performRequest performs a pre-prepared http.Request and does the proper error-handling for it.
 // does a json.Unmarshal into the v interface{} and returns the error of it if everything went well so far.
 func (g *GraphClient) performRequest(req *http.Request, v interface{}) error {
