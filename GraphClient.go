@@ -27,6 +27,8 @@ type GraphClient struct {
 	ClientSecret  string // See https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal#get-application-id-and-authentication-key
 
 	token Token // the current token to be used
+
+	HttpClient *http.Client
 }
 
 func (g *GraphClient) String() string {
@@ -213,8 +215,13 @@ func (g *GraphClient) MakePUTAPICall(apicall string, getParams url.Values, body 
 // performRequest performs a pre-prepared http.Request and does the proper error-handling for it.
 // does a json.Unmarshal into the v interface{} and returns the error of it if everything went well so far.
 func (g *GraphClient) performRequest(req *http.Request, v interface{}) error {
-	httpClient := &http.Client{
-		Timeout: time.Second * 10,
+	var httpClient *http.Client
+	if g.HttpClient != nil {
+		httpClient = g.HttpClient
+	} else {
+		httpClient = &http.Client{
+			Timeout: time.Second * 10,
+		}
 	}
 	resp, err := httpClient.Do(req)
 	if err != nil {
